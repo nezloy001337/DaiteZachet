@@ -17,8 +17,8 @@ class Level03 : Level() {
     override val hintText = "Не трогай кнопку!"
 
     override fun setup(engine: GameEngine) {
-        engine.addPlatform(0.04f, 0.68f, 0.44f)   // P1
-        engine.addPlatform(0.52f, 0.42f, 0.92f)   // P2
+        engine.addPlatform(0.04f, 0.68f, 0.44f, 0.72f)   // P1
+        engine.addPlatform(0.52f, 0.42f, 0.92f, 0.46f)   // P2
 
         engine.placeKey(0.72f, 0.42f)
         engine.door.isOpen = true

@@ -25,8 +25,8 @@ class Level04 : Level() {
 
     override fun setup(engine: GameEngine) {
         // Две платформы на разной высоте
-        engine.addPlatform(0.04f, 0.74f, 0.38f)   // P1 — левая
-        engine.addPlatform(0.33f, 0.60f, 0.86f)   // P2 — правая
+        engine.addPlatform(0.04f, 0.74f, 0.38f, 0.78f)   // P1 — левая
+        engine.addPlatform(0.33f, 0.60f, 0.86f, 0.64f)   // P2 — правая
 
         // Красный ключ на P1, синий на P2
         engine.placeKey(0.20f, 0.74f, id = 1, color = Color.rgb(255, 80, 80))

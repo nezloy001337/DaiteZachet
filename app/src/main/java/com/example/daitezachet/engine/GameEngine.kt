@@ -154,6 +154,19 @@ class GameEngine(val room: Room) {
     // -------------------------------------------------------------------------
     // Helpers — координаты в долях (0f..1f) от размеров комнаты
 
+    /**
+     * Переместить кнопку.
+     * xr — левый край кнопки (доля ширины), yr — нижний край кнопки (доля высоты).
+     * Размер кнопки сохраняется (54×24 px).
+     */
+    fun placeButton(xr: Float, yr: Float) {
+        val bw = button.bounds.width()
+        val bh = button.bounds.height()
+        val x  = room.w * xr
+        val y  = room.h * yr
+        button.bounds.set(x, y - bh, x + bw, y)
+    }
+
     /** Платформа: все четыре границы в долях экрана (0.0–1.0). */
     fun addPlatform(x1r: Float, y1r: Float, x2r: Float, y2r: Float) {
         platforms.add(RectF(room.w * x1r, room.h * y1r, room.w * x2r, room.h * y2r))

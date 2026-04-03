@@ -34,20 +34,19 @@ class Level05 : Level() {
         engine.button.hidden = true
 
         // P1 — горизонтальная платформа слева
-        engine.addPlatform(0.08f, 0.65f, 0.38f)
+        engine.addPlatform(0.08f, 0.65f, 0.38f, 0.69f)
 
         // Шипы на правой половине верхней грани P1 — только левая часть безопасна
         engine.addSpikesAt(0.23f, 0.38f, yr = 0.65f, dir = SpikeDir.UP)
 
-        // P_col — вертикальная колонна по центру (препятствие)
-        // Высота: от yr=0.40 вниз на 50% игровой зоны
-        engine.addPlatform(0.44f, 0.40f, 0.49f, h = engine.room.h * 0.52f)
+        // P_col — вертикальная колонна по центру (от y=0.40 до y=0.92)
+        engine.addPlatform(0.44f, 0.40f, 0.49f, 0.92f)
 
         // Шипы на ПРАВОМ боку колонны — нельзя подходить справа
         engine.addSpikesWall(0.40f, 0.92f, xr = 0.49f, dir = SpikeDir.RIGHT)
 
         // P2 — высокая платформа справа от колонны (на одном уровне с её вершиной)
-        engine.addPlatform(0.53f, 0.40f, 0.90f)
+        engine.addPlatform(0.53f, 0.40f, 0.90f, 0.44f)
 
         // Шипы СНИЗУ P2 — больно прыгать снизу, сверху приземляться можно
         engine.addSpikesAt(0.53f, 0.90f, yr = 0.40f, dir = SpikeDir.DOWN)

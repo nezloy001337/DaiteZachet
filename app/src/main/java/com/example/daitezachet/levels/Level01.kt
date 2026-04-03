@@ -27,8 +27,8 @@ class Level01 : Level() {
 
     override fun setup(engine: GameEngine) {
         // Длинная платформа — почти через всю комнату, y=0.68 как в оригинале (досягаемо с пола)
-        engine.addPlatform(0.00f, 0.68f, 0.90f, 0.72f)
-        engine.addPlatform(0.95f, 0.20f, 0.97f, 1.00f)
+        engine.addPlatform(0.00f, 0.68f, 0.83f, 0.72f)
+        engine.addPlatform(0.95f, 0.5f, 0.97f, 1.00f)
 
 
         // Ключ на правой части платформы — нужно пройти туда
@@ -36,7 +36,7 @@ class Level01 : Level() {
 
         // Боковые шипы на правой стене — только на высоте платформы и выше (y2r=0.62).
         // Нельзя прыгнуть с платформы прямо к двери, но пол ниже шипов — проход чистый.
-        engine.addSpikesWall(0.5f, 0.2f, xr = 0.90f, dir = SpikeDir.LEFT)
+        engine.addSpikesWall(0.5f, 1f,0.95f, dir = SpikeDir.LEFT)
 
         // Кнопка открывает дверь только если у игрока есть ключ
         engine.onButtonPressed = { e ->
