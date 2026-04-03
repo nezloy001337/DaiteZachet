@@ -63,10 +63,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     private val hudPaint    = Paint().apply {
         color = Color.WHITE; textSize = 52f; isAntiAlias = true; typeface = Typeface.DEFAULT_BOLD
     }
-    private val hintPaint = Paint().apply {
-        color = Color.rgb(170, 170, 170); textSize = 38f; isAntiAlias = true
-        textAlign = Paint.Align.CENTER
-    }
     private val ctrlStrokePaint = Paint().apply {
         style = Paint.Style.STROKE; strokeWidth = 3f
         color = Color.argb(80, 255, 255, 255); isAntiAlias = true
@@ -184,7 +180,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         drawKey(canvas)
         drawSpikes(canvas)
         drawPlayer(canvas)
-        drawHud(canvas)
         drawControls(canvas)
 
         level.draw(canvas, engine, hudPaint)
@@ -293,20 +288,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
             val kBounds = RectF(pb.centerX() - 12f, pb.top - 26f, pb.centerX() + 12f, pb.top - 2f)
             drawDiamond(canvas, kBounds, keyPaint)
         }
-    }
-
-    private fun drawHud(canvas: Canvas) {
-        // Тёмная подложка под весь верхний HUD-бар
-        overlayPaint.color = Color.argb(180, 10, 10, 18)
-        overlayPaint.style = Paint.Style.FILL
-        canvas.drawRect(0f, 0f, screenW, 130f, overlayPaint)
-
-        hudPaint.textAlign = Paint.Align.LEFT
-        hudPaint.textSize  = 52f
-        canvas.drawText("Уровень $levelNumber", 24f, 64f, hudPaint)
-
-        hintPaint.alpha = 220
-        canvas.drawText(level.hintText, screenW / 2f, 112f, hintPaint)
     }
 
     private fun drawControls(canvas: Canvas) {
