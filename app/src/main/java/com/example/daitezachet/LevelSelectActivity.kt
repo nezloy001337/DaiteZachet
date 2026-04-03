@@ -25,7 +25,7 @@ class LevelSelectActivity : AppCompatActivity() {
         // Контейнер с заголовком
         val inner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.rgb(18, 18, 28))
+            setBackgroundColor(Color.rgb(26, 26, 40))
             setPadding(24, 32, 24, 32)
         }
 
@@ -49,7 +49,7 @@ class LevelSelectActivity : AppCompatActivity() {
                 textSize = 22f
                 typeface = Typeface.DEFAULT_BOLD
                 setTextColor(Color.WHITE)
-                setBackgroundColor(Color.rgb(40, 80, 140))
+                setBackgroundColor(Color.rgb(55, 105, 180))
                 gravity  = Gravity.CENTER
 
                 layoutParams = GridLayout.LayoutParams().apply {

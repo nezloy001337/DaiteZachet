@@ -1,56 +1,46 @@
 package com.example.daitezachet.levels
 
+import android.graphics.Color
 import com.example.daitezachet.engine.GameEngine
+import com.example.daitezachet.engine.SpikeDir
 
 /**
- * Уровень 4 — "Кнопка не нужна".
+ * Уровень 4 — «Два ключа».
  *
- * Весь пол в шипах — по земле не пройти.
- * Четыре ступени ведут наверх-вправо лестницей.
- * Ключ лежит на самой высокой ступени.
+ * Нужно собрать ОБА ключа (красный и синий), прежде чем откроется дверь.
+ * Шипы на полу и боковые шипы на правой стене загораживают прямой путь.
  *
- * Твист: кнопку нажать невозможно (она в шипах).
- *        Ключ сам открывает дверь — без кнопки.
- *
- *  ╔═══════════════════════════════╗
- *  ║                   [KEY]──P4  ║
- *  ║              ────P3          ║
- *  ║         ────P2               ║
- *  ║    ────P1                    ║
+ *  ╔════════════════════════════════╗
+ *  ║          [R]         [B]      ║
+ *  ║  ─────P1          ─────P2  ▶▶║  ← боковые шипы справа
  *  ║▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲║
- *  ╚═══════════════════════════════╝
+ *  ╚════════════════════════════════╝
+ *
+ *  R = красный ключ (id=1), B = синий ключ (id=2)
+ *  Дверь открывается когда собраны оба.
  */
 class Level04 : Level() {
     override val number   = 4
-    override val hintText = "Нажми кнопку?"   // вопрос намеренный
+    override val hintText = "Собери оба ключа"
 
     override fun setup(engine: GameEngine) {
-        // Лестница — каждая ступень короче и тоньше предыдущей
-        //           x1r   yr    x2r   h
-        engine.addPlatform(0.04f, 0.72f, 0.28f, h = 60f)  // длинная  толстая
-        engine.addPlatform(0.30f, 0.55f, 0.46f, h = 30f)  // средняя  стандартная
-        engine.addPlatform(0.48f, 0.38f, 0.58f, h = 14f)  // короткая тонкая
-        engine.addPlatform(0.60f, 0.22f, 0.66f, h = 8f)   // крошечная нить — на ней ключ
+        // Две платформы на разной высоте
+        engine.addPlatform(0.04f, 0.62f, 0.38f)   // P1 — левая, ниже
+        engine.addPlatform(0.55f, 0.42f, 0.86f)   // P2 — правая, выше
 
-        // Ключ на вершине лестницы
-        engine.placeKey(0.80f, 0.22f)
+        // Красный ключ на P1, синий на P2
+        engine.placeKey(0.20f, 0.62f, id = 1, color = Color.rgb(255, 80, 80))
+        engine.placeKey(0.70f, 0.42f, id = 2, color = Color.rgb(80, 140, 255))
 
-        // Весь пол в шипах — идти по земле нельзя
-        // Оставляем зазор у стен, чтобы не спавниться на шипах
-        engine.addSpikesFloor(0.08f, 0.86f)
+        // Шипы на полу — по центру, оставляем зону у спавна и у правого края
+        engine.addSpikesFloor(0.10f, 0.82f)
 
-        // Ключ подобран → дверь открывается сама (кнопка тут ни при чём)
-        engine.onUpdate = { e, _ ->
-            if (e.player.hasKey && !e.door.isOpen) {
-                e.door.isOpen = true
-            }
-        }
+        // Боковые шипы на правой стене — мешают просто подбежать к двери
+        engine.addSpikesWall(0.10f, 0.40f, xr = 0.96f, dir = SpikeDir.LEFT)
 
-        // Кнопка — ловушка: нажатие закрывает дверь обратно
-        engine.onButtonPressed = { e -> e.door.isOpen = false }
+        // Дверь открывается только когда собраны оба ключа
+        engine.openDoorWhenAllKeys()
 
-        engine.winCondition = { e ->
-            e.player.hasKey && e.door.isOpen && isPlayerAtDoor(e)
-        }
+        engine.winCondition = { e -> e.door.isOpen && isPlayerAtDoor(e) }
     }
 }

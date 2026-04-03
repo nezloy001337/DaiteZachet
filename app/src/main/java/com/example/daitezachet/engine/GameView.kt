@@ -232,14 +232,16 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     }
 
     private fun drawKey(canvas: Canvas) {
-        val k = engine.key ?: return
-        val paint = if (k.isCollected) keyCollectedPaint else keyPaint
-        drawDiamond(canvas, k.bounds, paint)
-        // Shine dot
-        if (!k.isCollected) {
-            overlayPaint.color = Color.argb(200, 255, 255, 200)
-            overlayPaint.style = Paint.Style.FILL
-            canvas.drawCircle(k.bounds.left + 8f, k.bounds.top + 8f, 4f, overlayPaint)
+        for (k in engine.keys) {
+            keyPaint.color = if (k.isCollected) Color.argb(100,
+                Color.red(k.color), Color.green(k.color), Color.blue(k.color))
+            else k.color
+            drawDiamond(canvas, k.bounds, keyPaint)
+            if (!k.isCollected) {
+                overlayPaint.color = Color.argb(200, 255, 255, 200)
+                overlayPaint.style = Paint.Style.FILL
+                canvas.drawCircle(k.bounds.left + 8f, k.bounds.top + 8f, 4f, overlayPaint)
+            }
         }
     }
 
@@ -247,14 +249,27 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         for (spike in engine.spikes) {
             spikePathBuf.rewind()
             val b = spike.bounds
-            if (spike.flipped) {
-                spikePathBuf.moveTo(b.centerX(), b.bottom)
-                spikePathBuf.lineTo(b.right, b.top)
-                spikePathBuf.lineTo(b.left, b.top)
-            } else {
-                spikePathBuf.moveTo(b.centerX(), b.top)
-                spikePathBuf.lineTo(b.right, b.bottom)
-                spikePathBuf.lineTo(b.left, b.bottom)
+            when (spike.dir) {
+                SpikeDir.UP -> {
+                    spikePathBuf.moveTo(b.centerX(), b.top)
+                    spikePathBuf.lineTo(b.right, b.bottom)
+                    spikePathBuf.lineTo(b.left,  b.bottom)
+                }
+                SpikeDir.DOWN -> {
+                    spikePathBuf.moveTo(b.centerX(), b.bottom)
+                    spikePathBuf.lineTo(b.right, b.top)
+                    spikePathBuf.lineTo(b.left,  b.top)
+                }
+                SpikeDir.LEFT -> {
+                    spikePathBuf.moveTo(b.left,  b.centerY())
+                    spikePathBuf.lineTo(b.right, b.top)
+                    spikePathBuf.lineTo(b.right, b.bottom)
+                }
+                SpikeDir.RIGHT -> {
+                    spikePathBuf.moveTo(b.right, b.centerY())
+                    spikePathBuf.lineTo(b.left,  b.top)
+                    spikePathBuf.lineTo(b.left,  b.bottom)
+                }
             }
             spikePathBuf.close()
             canvas.drawPath(spikePathBuf, spikePaint)
@@ -281,18 +296,27 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     }
 
     private fun drawHud(canvas: Canvas) {
+        // Тёмная подложка под весь верхний HUD-бар
+        overlayPaint.color = Color.argb(180, 10, 10, 18)
+        overlayPaint.style = Paint.Style.FILL
+        canvas.drawRect(0f, 0f, screenW, 130f, overlayPaint)
+
         hudPaint.textAlign = Paint.Align.LEFT
         hudPaint.textSize  = 52f
         canvas.drawText("Уровень $levelNumber", 24f, 64f, hudPaint)
 
-        hintPaint.alpha = 200
-        canvas.drawText(level.hintText, screenW / 2f, 116f, hintPaint)
+        hintPaint.alpha = 220
+        canvas.drawText(level.hintText, screenW / 2f, 112f, hintPaint)
     }
 
     private fun drawControls(canvas: Canvas) {
-        // Subtle separator line
-        overlayPaint.color = Color.argb(60, 255, 255, 255)
+        // Тёмная подложка панели управления
+        overlayPaint.color = Color.argb(210, 10, 10, 18)
         overlayPaint.style = Paint.Style.FILL
+        canvas.drawRect(0f, gameH, screenW, screenH, overlayPaint)
+
+        // Разделительная линия
+        overlayPaint.color = Color.argb(160, 255, 255, 255)
         canvas.drawRect(0f, gameH, screenW, gameH + 2f, overlayPaint)
 
         canvas.drawRoundRect(input.btnLeft,  14f, 14f, ctrlStrokePaint)

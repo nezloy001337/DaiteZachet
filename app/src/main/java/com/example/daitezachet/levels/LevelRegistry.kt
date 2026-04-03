@@ -5,7 +5,8 @@ object LevelRegistry {
         Level01(),
         Level02(),
         Level03(),
-        Level04()
+        Level04(),
+        Level05()
     )
 
     val count: Int get() = levels.size
