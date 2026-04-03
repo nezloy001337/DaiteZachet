@@ -217,6 +217,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     }
 
     private fun drawButton(canvas: Canvas) {
+        if (engine.button.hidden) return
         val b = engine.button.bounds
         buttonPaint.color = if (engine.button.isPressed)
             Color.rgb(160, 20, 20) else Color.rgb(230, 50, 50)

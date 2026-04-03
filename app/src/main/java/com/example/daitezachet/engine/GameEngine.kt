@@ -82,6 +82,11 @@ class GameEngine(val room: Room) {
         if (!RectF.intersects(pb, rect)) return
         val overlapL = pb.right  - rect.left
         val overlapR = rect.right - pb.left
+        val overlapT = pb.bottom - rect.top
+        val overlapB = rect.bottom - pb.top
+        // Если вертикальное перекрытие меньше горизонтального — игрок стоит
+        // сверху/снизу поверхности; горизонтальная ось разрешается в resolveV.
+        if (minOf(overlapT, overlapB) <= minOf(overlapL, overlapR)) return
         if (overlapL < overlapR) {
             player.x -= overlapL
             if (player.vx > 0f) player.vx = 0f
@@ -96,6 +101,11 @@ class GameEngine(val room: Room) {
         if (!RectF.intersects(pb, rect)) return
         val overlapT = pb.bottom - rect.top
         val overlapB = rect.bottom - pb.top
+        val overlapL = pb.right  - rect.left
+        val overlapR = rect.right - pb.left
+        // Если горизонтальное перекрытие меньше вертикального — это боковое
+        // столкновение со стеной; вертикальная ось разрешается в resolveH.
+        if (minOf(overlapL, overlapR) < minOf(overlapT, overlapB)) return
         if (overlapT < overlapB) {
             player.y -= overlapT
             player.vy = 0f
@@ -128,12 +138,14 @@ class GameEngine(val room: Room) {
             }
         }
 
-        // Button — only triggers when player stands on it
-        val wasPressed = button.isPressed
-        button.isPressed = player.isOnGround && RectF.intersects(pb, button.bounds)
-        when {
-            button.isPressed && !wasPressed -> { button.pressCount++; onButtonPressed?.invoke(this) }
-            !button.isPressed && wasPressed -> onButtonReleased?.invoke(this)
+        // Button — only triggers when player stands on it and button is visible
+        if (!button.hidden) {
+            val wasPressed = button.isPressed
+            button.isPressed = player.isOnGround && RectF.intersects(pb, button.bounds)
+            when {
+                button.isPressed && !wasPressed -> { button.pressCount++; onButtonPressed?.invoke(this) }
+                !button.isPressed && wasPressed -> onButtonReleased?.invoke(this)
+            }
         }
 
         // Win check (only relevant when door is open)
@@ -147,11 +159,14 @@ class GameEngine(val room: Room) {
     // Helpers для Level.setup() — координаты в долях (0f..1f) от размеров комнаты
 
     /**
-     * Добавить платформу. x1r/x2r — левый/правый край, yr — верхняя грань.
-     * Толщина = wallThick.
+     * Добавить платформу.
+     * @param x1r   левый край  (0.0 – 1.0, доля ширины экрана)
+     * @param yr    верхняя грань (0.0 – 1.0, доля высоты игровой области)
+     * @param x2r   правый край (0.0 – 1.0)
+     * @param h     толщина в пикселях (по умолчанию = wallThick ≈ 30px)
      */
-    fun addPlatform(x1r: Float, yr: Float, x2r: Float) {
-        platforms.add(RectF(room.w * x1r, room.h * yr, room.w * x2r, room.h * yr + room.wallThick))
+    fun addPlatform(x1r: Float, yr: Float, x2r: Float, h: Float = room.wallThick) {
+        platforms.add(RectF(room.w * x1r, room.h * yr, room.w * x2r, room.h * yr + h))
     }
 
     /**
@@ -198,6 +213,7 @@ class GameEngine(val room: Room) {
         player.reset(room.playerSpawnX, room.playerSpawnY)
         button.isPressed  = false
         button.pressCount = 0
+        button.hidden     = false
         door.isOpen       = false
         key?.isCollected  = false
         key               = null

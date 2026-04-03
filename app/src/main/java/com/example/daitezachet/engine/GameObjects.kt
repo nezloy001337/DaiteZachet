@@ -6,6 +6,7 @@ class Button(rect: RectF) {
     val bounds     = RectF(rect)
     var isPressed  = false
     var pressCount = 0
+    var hidden     = false   // true → не рисуется и не срабатывает
 }
 
 class Door(rect: RectF) {
