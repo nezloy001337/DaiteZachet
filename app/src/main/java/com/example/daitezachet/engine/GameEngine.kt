@@ -23,6 +23,9 @@ class GameEngine(val room: Room) {
     @Volatile var moveLeft      = false
     @Volatile var moveRight     = false
     @Volatile var jumpRequested = false
+    @Volatile var jumpHeld      = false
+
+    private var prevJumpHeld = false
 
     // Хуки уровня
     var onButtonPressed:  ((GameEngine) -> Unit)?         = null
@@ -55,6 +58,12 @@ class GameEngine(val room: Room) {
             player.isOnGround = false
         }
         jumpRequested = false
+
+        // Jump cut: отпустил кнопку в полёте → обрезаем скорость вверх
+        if (prevJumpHeld && !jumpHeld && player.vy < 0f) {
+            player.vy = player.vy.coerceAtLeast(-320f)
+        }
+        prevJumpHeld = jumpHeld
 
         player.vy += GRAVITY * dt
         player.vy  = player.vy.coerceAtMost(1200f)
@@ -235,6 +244,8 @@ class GameEngine(val room: Room) {
         moveLeft       = false
         moveRight      = false
         jumpRequested  = false
+        jumpHeld       = false
+        prevJumpHeld   = false
         doorCondition  = null
         // onButtonPressed/Released, onUpdate, winCondition — не сбрасываем,
         // Level.setup() перезапишет их после reset().

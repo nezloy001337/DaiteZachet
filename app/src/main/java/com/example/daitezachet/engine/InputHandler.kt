@@ -41,20 +41,23 @@ class InputHandler(
                 activePointers.clear()
                 engine.moveLeft  = false
                 engine.moveRight = false
+                engine.jumpHeld  = false
                 return true
             }
         }
 
-        // Recompute direction from all still-active pointers
-        var left = false; var right = false
+        // Recompute direction and jump-held from all still-active pointers
+        var left = false; var right = false; var jump = false
         for (i in 0 until event.pointerCount) {
             if (event.getPointerId(i) !in activePointers) continue
             val x = event.getX(i); val y = event.getY(i)
             if (btnLeft.contains(x, y))  left  = true
             if (btnRight.contains(x, y)) right = true
+            if (btnJump.contains(x, y))  jump  = true
         }
         engine.moveLeft  = left
         engine.moveRight = right
+        engine.jumpHeld  = jump
         return true
     }
 }
