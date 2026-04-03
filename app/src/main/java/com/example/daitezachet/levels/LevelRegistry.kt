@@ -3,10 +3,7 @@ package com.example.daitezachet.levels
 object LevelRegistry {
     private val levels: List<Level> = listOf(
         Level01(),
-        Level02(),
-        Level03(),
-        Level04(),
-        Level05()
+        Level02()
     )
 
     val count: Int get() = levels.size
