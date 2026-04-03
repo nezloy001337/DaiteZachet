@@ -35,6 +35,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     private val WIN_DELAY   = 1.4f
 
     var onGameComplete: (() -> Unit)? = null
+    var onExitLevel:    (() -> Unit)? = null
+
+    // Exit button bounds — top-left corner, initialised in surfaceChanged
+    private val btnExit = android.graphics.RectF()
 
     // -------------------------------------------------------------------------
     // Paints — allocated once
@@ -63,6 +67,17 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     private val hudPaint    = Paint().apply {
         color = Color.WHITE; textSize = 52f; isAntiAlias = true; typeface = Typeface.DEFAULT_BOLD
     }
+    private val hintPaint = Paint().apply {
+        color = Color.rgb(170, 170, 170); textSize = 38f; isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+    private val exitPaint = Paint().apply {
+        color = Color.argb(180, 220, 60, 60); style = Paint.Style.FILL; isAntiAlias = true
+    }
+    private val exitTextPaint = Paint().apply {
+        color = Color.WHITE; textSize = 44f; isAntiAlias = true; textAlign = Paint.Align.CENTER
+        typeface = Typeface.DEFAULT_BOLD
+    }
     private val ctrlStrokePaint = Paint().apply {
         style = Paint.Style.STROKE; strokeWidth = 3f
         color = Color.argb(80, 255, 255, 255); isAntiAlias = true
@@ -85,6 +100,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         screenW = width.toFloat()
         screenH = height.toFloat()
         gameH   = screenH * 0.78f
+        btnExit.set(screenW - 110f, 8f, screenW - 8f, 78f)
         setupLevel(startLevelNumber)
         resume()
     }
@@ -180,6 +196,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         drawKey(canvas)
         drawSpikes(canvas)
         drawPlayer(canvas)
+        drawHud(canvas)
+        drawExitButton(canvas)
         drawControls(canvas)
 
         level.draw(canvas, engine, hudPaint)
@@ -290,6 +308,24 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         }
     }
 
+    private fun drawHud(canvas: Canvas) {
+        overlayPaint.color = Color.argb(180, 10, 10, 18)
+        overlayPaint.style = Paint.Style.FILL
+        canvas.drawRect(0f, 0f, screenW, 90f, overlayPaint)
+
+        hudPaint.textAlign = Paint.Align.LEFT
+        hudPaint.textSize  = 48f
+        canvas.drawText("Уровень $levelNumber", 24f, 62f, hudPaint)
+
+        hintPaint.alpha = 200
+        canvas.drawText(level.hintText, screenW / 2f, 66f, hintPaint)
+    }
+
+    private fun drawExitButton(canvas: Canvas) {
+        canvas.drawRoundRect(btnExit, 12f, 12f, exitPaint)
+        canvas.drawText("✕", btnExit.centerX(), btnExit.centerY() + 16f, exitTextPaint)
+    }
+
     private fun drawControls(canvas: Canvas) {
         // Тёмная подложка панели управления
         overlayPaint.color = Color.argb(210, 10, 10, 18)
@@ -349,6 +385,17 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!::input.isInitialized) return true
+
+        // Exit button — single tap anywhere on the button
+        if (event.actionMasked == MotionEvent.ACTION_DOWN ||
+            event.actionMasked == MotionEvent.ACTION_POINTER_DOWN) {
+            val idx = event.actionIndex
+            if (btnExit.contains(event.getX(idx), event.getY(idx))) {
+                post { onExitLevel?.invoke() }
+                return true
+            }
+        }
+
         if (showDeath || showWin) return true
         return input.onTouch(event, engine)
     }

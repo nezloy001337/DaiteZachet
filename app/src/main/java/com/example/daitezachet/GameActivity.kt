@@ -31,6 +31,7 @@ class GameActivity : AppCompatActivity() {
         gameView = GameView(this).apply {
             startLevelNumber = startLevel
             onGameComplete = { showCompleteScreen(container) }
+            onExitLevel    = { finish() }
         }
 
         container.addView(gameView, FrameLayout.LayoutParams(
