@@ -6,7 +6,8 @@ import android.graphics.RectF
 class GameEngine(val room: Room) {
 
     companion object {
-        const val GRAVITY = 1600f
+        const val GRAVITY    = 1600f
+        const val JUMP_GRACE = 0.12f   // первые N секунд после прыжка — отпускание не обрезает высоту
     }
 
     val player    = Player(room.playerSpawnX, room.playerSpawnY)
@@ -25,7 +26,8 @@ class GameEngine(val room: Room) {
     @Volatile var jumpRequested = false
     @Volatile var jumpHeld      = false
 
-    private var prevJumpHeld = false
+    private var prevJumpHeld   = false
+    private var jumpGraceTimer = 0f          // секунды до конца льготного окна прыжка
 
     // Хуки уровня
     var onButtonPressed:  ((GameEngine) -> Unit)?         = null
@@ -56,11 +58,15 @@ class GameEngine(val room: Room) {
         if (jumpRequested && player.isOnGround) {
             player.vy = Player.JUMP_FORCE
             player.isOnGround = false
+            jumpGraceTimer = JUMP_GRACE     // запускаем льготное окно
         }
         jumpRequested = false
 
-        // Jump cut: отпустил кнопку в полёте → обрезаем скорость вверх
-        if (prevJumpHeld && !jumpHeld && player.vy < 0f) {
+        if (jumpGraceTimer > 0f) jumpGraceTimer -= dt
+
+        // Jump cut: отпустил кнопку в полёте → обрезаем скорость вверх,
+        // но только после истечения льготного окна (первые JUMP_GRACE секунд — без обрезки).
+        if (prevJumpHeld && !jumpHeld && player.vy < 0f && jumpGraceTimer <= 0f) {
             player.vy = player.vy.coerceAtLeast(-320f)
         }
         prevJumpHeld = jumpHeld
@@ -148,9 +154,9 @@ class GameEngine(val room: Room) {
     // -------------------------------------------------------------------------
     // Helpers — координаты в долях (0f..1f) от размеров комнаты
 
-    /** Платформа: x1r/yr/x2r — доли экрана, h — толщина в пикселях. */
-    fun addPlatform(x1r: Float, yr: Float, x2r: Float, h: Float = room.wallThick) {
-        platforms.add(RectF(room.w * x1r, room.h * yr, room.w * x2r, room.h * yr + h))
+    /** Платформа: все четыре границы в долях экрана (0.0–1.0). */
+    fun addPlatform(x1r: Float, y1r: Float, x2r: Float, y2r: Float) {
+        platforms.add(RectF(room.w * x1r, room.h * y1r, room.w * x2r, room.h * y2r))
     }
 
     /** Шипы острием ВВЕРХ на полу между x1r и x2r. */
@@ -246,6 +252,7 @@ class GameEngine(val room: Room) {
         jumpRequested  = false
         jumpHeld       = false
         prevJumpHeld   = false
+        jumpGraceTimer = 0f
         doorCondition  = null
         // onButtonPressed/Released, onUpdate, winCondition — не сбрасываем,
         // Level.setup() перезапишет их после reset().
