@@ -17,7 +17,7 @@ class InputHandler(
     private val padH = 14f
     private val padV = 12f
     val btnLeft  = RectF(padH,                       controlsTop + padV, screenW * 0.28f - padH,  screenH - padV)
-    val btnRight = RectF(screenW * 0.36f + padH,     controlsTop + padV, screenW * 0.64f - padH,  screenH - padV)
+    val btnRight = RectF(screenW * 0.28f + padH,     controlsTop + padV, screenW * 0.56f - padH,  screenH - padV)
     val btnJump  = RectF(screenW * 0.72f + padH,     controlsTop + padV, screenW         - padH,  screenH - padV)
 
     // Track which pointer IDs are currently down
