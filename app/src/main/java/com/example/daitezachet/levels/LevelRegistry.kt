@@ -4,6 +4,9 @@ object LevelRegistry {
     private val levels: List<Level> = listOf(
         Level02(), // 1
         Level03(), // 3
+        Level04(), // 4
+        Level05(), // 5
+        Level06(), // 6
         Level07(),
     )
 
