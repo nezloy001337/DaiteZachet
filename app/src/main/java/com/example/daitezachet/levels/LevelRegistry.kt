@@ -8,6 +8,8 @@ object LevelRegistry {
         Level05(), // 5
         Level06(), // 6
         Level07(),
+        Level08(),
+        Level09(),
     )
 
 
