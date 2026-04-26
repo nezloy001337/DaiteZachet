@@ -2,45 +2,59 @@ package com.example.daitezachet.levels
 
 import android.graphics.Color
 import com.example.daitezachet.engine.GameEngine
-import com.example.daitezachet.engine.SpikeDir
 
 /**
- * Уровень 4 — «Два ключа».
+ * Уровень 4 — «Ложный выбор».
  *
- * Нужно собрать ОБА ключа (красный и синий), прежде чем откроется дверь.
- * Шипы на полу и боковые шипы на правой стене загораживают прямой путь.
+ * Красный и синий кристаллы — правильные.
+ * Золотой кристалл выглядит как лёгкая награда на очевидном пути,
+ * но при подборе мгновенно убивает игрока.
  *
- *  ╔════════════════════════════════╗
- *  ║          [R]         [B]      ║
- *  ║  ─────P1          ─────P2  ▶▶║  ← боковые шипы справа
- *  ║▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲║
- *  ╚════════════════════════════════╝
- *
- *  R = красный ключ (id=1), B = синий ключ (id=2)
- *  Дверь открывается когда собраны оба.
+ * Смысл уровня: не всё очевидное ведёт к победе
  */
+
 class Level04 : Level() {
     override val number   = 4
-    override val hintText = "Собери оба ключа"
+    override val hintText = "Соберите 2 ключа"
 
     override fun setup(engine: GameEngine) {
-        // Две платформы на разной высоте
-        engine.addPlatform(0.04f, 0.74f, 0.38f, 0.78f)   // P1 — левая
-        engine.addPlatform(0.33f, 0.60f, 0.86f, 0.64f)   // P2 — правая
+        val trapKeyId = 99
+        val requiredKeys = setOf(1, 2)
 
-        // Красный ключ на P1, синий на P2
-        engine.placeKey(0.20f, 0.74f, id = 1, color = Color.rgb(255, 80, 80))
-        engine.placeKey(0.70f, 0.60f, id = 2, color = Color.rgb(80, 140, 255))
+        engine.button.hidden = true
 
-        // Шипы на полу — по центру, оставляем зону у спавна и у правого края
-        engine.addSpikesFloor(0.10f, 0.82f)
+        // Левая колонна вверх
+        engine.addPlatform(0.05f, 0.78f, 0.20f, 0.82f)  // старт
+        engine.addPlatform(0.05f, 0.62f, 0.20f, 0.66f)  // красный
+        engine.addPlatform(0.05f, 0.46f, 0.20f, 0.50f)
 
-        // Боковые шипы на правой стене — мешают просто подбежать к двери
-        engine.addSpikesWall(0.10f, 0.40f, xr = 0.96f, dir = SpikeDir.LEFT)
+        // Верхняя перемычка с золотым
+        engine.addPlatform(0.30f, 0.38f, 0.70f, 0.42f)  // золотой в центре!
 
-        // Дверь открывается только когда собраны оба ключа
-        engine.openDoorWhenAllKeys()
+        // Правая колонна вниз
+        engine.addPlatform(0.75f, 0.46f, 0.90f, 0.50f)
+        engine.addPlatform(0.75f, 0.62f, 0.90f, 0.66f)  // синий
+        engine.addPlatform(0.75f, 0.78f, 0.90f, 0.82f)  // выход
 
+        engine.placeKey(0.12f, 0.62f, id = 1, color = Color.rgb(255, 80, 80))
+        engine.placeKey(0.50f, 0.38f, id = trapKeyId, color = Color.rgb(255, 215, 0))
+        engine.placeKey(0.82f, 0.62f, id = 2, color = Color.rgb(80, 140, 255))
+
+        // Шипы на полу под верхними платформами
+        // Под левой колонной
+        engine.addSpikesFloor(0.05f, 0.20f)
+        // Под верхней перемычкой с золотым кристаллом
+        engine.addSpikesFloor(0.30f, 0.70f)
+        // Под правой колонной
+        engine.addSpikesFloor(0.75f, 0.90f)
+
+        // Дополнительные шипы на полу в центре (как в оригинале)
+        engine.addSpikesFloor(0.22f, 0.73f)
+
+        engine.doorCondition = { e -> requiredKeys.all { it in e.collectedKeys } }
+        engine.onUpdate = { e, _ ->
+            if (trapKeyId in e.collectedKeys) e.player.isDead = true
+        }
         engine.winCondition = { e -> e.door.isOpen && isPlayerAtDoor(e) }
     }
 }
