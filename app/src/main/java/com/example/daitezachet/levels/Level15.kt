@@ -6,7 +6,7 @@ import com.example.daitezachet.engine.SpikeDir
 import kotlin.math.*
 
 class Level15 : Level() {
-    override val number = 13
+    override val number = 15
     override val hintText = "ФИНАЛЬНЫЙ ПОДЪЁМ"
 
     private var chopperX = 0f

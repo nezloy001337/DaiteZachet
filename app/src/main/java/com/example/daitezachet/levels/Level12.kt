@@ -6,7 +6,7 @@ import com.example.daitezachet.engine.GameEngine
 import com.example.daitezachet.engine.SpikeDir
 
 /**
- * Уровень 6 — «Движущиеся платформы».
+ * Уровень 12 — «Движущиеся платформы».
  *
  * Механики: вертикальные платформы с разными фазами движения,
  *           кнопка-ловушка (ускоряет платформы до нереальной скорости),
@@ -50,8 +50,8 @@ import com.example.daitezachet.engine.SpikeDir
  *   ╚═════════════════════════════════════════════════════════════╝
  *   ▶ — дверь  ▼ — потолочные шипы  ▲ — шипы пола  A, B, C — горизонтальные платформы
  */
-class Level06 : Level() {
-    override val number   = 6
+class Level12 : Level() {
+    override val number   = 12
     override val hintText = "Советую сначала ключ, потом кнопку"
 
     // ── Внутренние модели движения ────────────────────────────────────────────
