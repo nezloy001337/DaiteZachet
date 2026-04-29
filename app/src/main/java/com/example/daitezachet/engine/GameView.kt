@@ -78,13 +78,24 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         color = Color.WHITE; textSize = 44f; isAntiAlias = true; textAlign = Paint.Align.CENTER
         typeface = Typeface.DEFAULT_BOLD
     }
+
+    private val ctrlFillPaint = Paint().apply {
+        style = Paint.Style.FILL; isAntiAlias = true
+    }
     private val ctrlStrokePaint = Paint().apply {
-        style = Paint.Style.STROKE; strokeWidth = 3f
-        color = Color.argb(80, 255, 255, 255); isAntiAlias = true
+        style = Paint.Style.STROKE; strokeWidth = 3.5f
+        color = Color.argb(180, 255, 255, 255); isAntiAlias = true
+    }
+    private val ctrlGlowPaint = Paint().apply {
+        style = Paint.Style.STROKE; strokeWidth = 8f; isAntiAlias = true
     }
     private val ctrlTextPaint = Paint().apply {
-        color = Color.argb(150, 255, 255, 255); textSize = 56f
+        color = Color.argb(240, 255, 255, 255); textSize = 58f
         isAntiAlias = true; textAlign = Paint.Align.CENTER
+        typeface = android.graphics.Typeface.DEFAULT_BOLD
+    }
+    private val ctrlArrowPaint = Paint().apply {
+        style = Paint.Style.FILL; isAntiAlias = true
     }
     private val overlayPaint = Paint()
     private val spikePathBuf = Path()
@@ -327,22 +338,74 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     }
 
     private fun drawControls(canvas: Canvas) {
-        // Тёмная подложка панели управления
-        overlayPaint.color = Color.argb(210, 10, 10, 18)
+        // ── Подложка панели ──
+        overlayPaint.color = Color.argb(220, 8, 8, 16)
         overlayPaint.style = Paint.Style.FILL
         canvas.drawRect(0f, gameH, screenW, screenH, overlayPaint)
 
-        // Разделительная линия
-        overlayPaint.color = Color.argb(160, 255, 255, 255)
-        canvas.drawRect(0f, gameH, screenW, gameH + 2f, overlayPaint)
+        // Тонкая светящаяся линия-разделитель
+        overlayPaint.color = Color.argb(100, 100, 160, 255)
+        canvas.drawRect(0f, gameH, screenW, gameH + 1.5f, overlayPaint)
+        overlayPaint.color = Color.argb(40, 100, 160, 255)
+        canvas.drawRect(0f, gameH + 1.5f, screenW, gameH + 5f, overlayPaint)
 
-        canvas.drawRoundRect(input.btnLeft,  14f, 14f, ctrlStrokePaint)
-        canvas.drawRoundRect(input.btnRight, 14f, 14f, ctrlStrokePaint)
-        canvas.drawRoundRect(input.btnJump,  14f, 14f, ctrlStrokePaint)
+        // ── Рисуем каждую кнопку ──
+        drawCtrlButton(canvas, input.btnLeft,  "←", isMove = true)
+        drawCtrlButton(canvas, input.btnRight, "→", isMove = true)
+        drawCtrlButton(canvas, input.btnJump,  "↑", isMove = false)
+    }
 
-        canvas.drawText("<", input.btnLeft.centerX(),  input.btnLeft.centerY()  + 20f, ctrlTextPaint)
-        canvas.drawText(">", input.btnRight.centerX(), input.btnRight.centerY() + 20f, ctrlTextPaint)
-        canvas.drawText("^", input.btnJump.centerX(),  input.btnJump.centerY()  + 20f, ctrlTextPaint)
+    private fun drawCtrlButton(canvas: Canvas, btn: android.graphics.RectF, label: String, isMove: Boolean) {
+        val r = 18f  // скругление углов
+        val cx = btn.centerX()
+        val cy = btn.centerY()
+
+        // Градиентная заливка: тёмно-синяя снизу, чуть светлее сверху
+        val gradient = android.graphics.LinearGradient(
+            cx, btn.top, cx, btn.bottom,
+            intArrayOf(
+                Color.argb(130, 40, 60, 120),
+                Color.argb(180, 15, 20, 50)
+            ),
+            null,
+            android.graphics.Shader.TileMode.CLAMP
+        )
+        ctrlFillPaint.shader = gradient
+        canvas.drawRoundRect(btn, r, r, ctrlFillPaint)
+        ctrlFillPaint.shader = null
+
+        // Внешнее свечение (синеватое)
+        ctrlGlowPaint.color = if (isMove)
+            Color.argb(60, 80, 140, 255)
+        else
+            Color.argb(80, 120, 80, 255)
+        canvas.drawRoundRect(
+            android.graphics.RectF(btn.left - 2f, btn.top - 2f, btn.right + 2f, btn.bottom + 2f),
+            r + 2f, r + 2f, ctrlGlowPaint
+        )
+
+        // Основная рамка
+        ctrlStrokePaint.color = if (isMove)
+            Color.argb(160, 100, 160, 255)
+        else
+            Color.argb(180, 160, 120, 255)
+        canvas.drawRoundRect(btn, r, r, ctrlStrokePaint)
+
+        // Верхняя светлая полоска (эффект объёма)
+        val shineRect = android.graphics.RectF(
+            btn.left + 10f, btn.top + 6f,
+            btn.right - 10f, btn.top + 14f
+        )
+        overlayPaint.color = Color.argb(50, 255, 255, 255)
+        overlayPaint.style = Paint.Style.FILL
+        canvas.drawRoundRect(shineRect, 6f, 6f, overlayPaint)
+
+        // Символ стрелки
+        ctrlTextPaint.color = if (isMove)
+            Color.argb(230, 160, 210, 255)
+        else
+            Color.argb(230, 210, 180, 255)
+        canvas.drawText(label, cx, cy + 22f, ctrlTextPaint)
     }
 
     private fun drawDeathOverlay(canvas: Canvas) {

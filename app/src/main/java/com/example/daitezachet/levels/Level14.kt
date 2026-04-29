@@ -9,7 +9,7 @@ import com.example.daitezachet.engine.Spike
 import com.example.daitezachet.engine.SpikeDir
 
 /**
- * Level16 — «СЕЙФ»
+ * Level14 — «СЕЙФ»
  *
  * Спавн: x=44..88px (xr≈0.023..0.046). Кнопка RST: xr=0.18.
  *
@@ -27,7 +27,7 @@ import com.example.daitezachet.engine.SpikeDir
 class Level14 : Level() {
 
     override val number   = 14
-    override val hintText = "Умри"
+    override val hintText = "Умри у барьера — пройди сквозь щель"
 
     // ── Персистентное состояние ───────────────────────────────────────────
     private val ghostPlatforms = mutableListOf<Pair<Float, Float>>()
@@ -187,21 +187,29 @@ class Level14 : Level() {
 
         engine.winCondition = { eng ->
             if (eng.door.isOpen && isPlayerAtDoor(eng)) {
-                ghostPlatforms.clear()   // ← сброс при победе
+                ghostPlatforms.clear()
                 true
             } else false
         }
     }
 
     private fun buildBarrier(engine: GameEngine, x1r: Float, x2r: Float) {
+        // Ширина барьера: ровно 2 шипа (шаг 32px, шип 28px)
+        // x2r не используется — вычисляем сами: x1r + 2*32px / room.w
+        // При room.w = 1920: 64/1920 = 0.0333f
+        val twoSpikes = 64f / engine.room.w  // всегда 2 шипа независимо от разрешения
+        val x2 = x1r + twoSpikes
+
+        // Шипы снизу: от пола до GAP_BOT
         var yr = 1.0f
         while (yr > GAP_BOT - 0.01f) {
-            engine.addSpikesAt(x1r, x2r, yr, SpikeDir.UP)
+            engine.addSpikesAt(x1r, x2, yr, SpikeDir.UP)
             yr -= 0.08f
         }
+        // Шипы сверху: от потолка до GAP_TOP
         yr = 0.0f
         while (yr < GAP_TOP + 0.01f) {
-            engine.addSpikesAt(x1r, x2r, yr, SpikeDir.DOWN)
+            engine.addSpikesAt(x1r, x2, yr, SpikeDir.DOWN)
             yr += 0.08f
         }
     }
