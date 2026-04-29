@@ -2,14 +2,15 @@ package com.example.daitezachet.levels
 
 object LevelRegistry {
     private val levels: List<Level> = listOf(
-        Level02(), // 1
-        Level03(), // 3
-        Level04(), // 4
-        Level05(), // 5
-        Level06(), // 6
-        Level07(),
-        Level08(),
-        Level15(),
+        Level02(), // 1 Андриана легкий 1
+        Level03(), // 3 Ани легкий 2
+        Level04(), // 4 Викин ниже среднего 5
+        Level05(), // 5 средне Полины 8
+        Level06(), // 6 Даши сложновато 12
+        Level07(), // Стаса ниже среднего 4
+        Level08(), // Насти сложновато 11
+        Level09(), //легкий Антона 3
+        Level15(), // сложный Миши 15
     )
 
 
