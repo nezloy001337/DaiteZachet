@@ -18,9 +18,9 @@ import com.example.daitezachet.engine.GameEngine
  *  ║☻ [btn]  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲   ▶ ║  ← выход
  *  ╚═══════════════════════════════════╝  ← шипы на полу
  */
-class Level11 : Level() {
+class Level10 : Level() {
 
-    override val number = 11
+    override val number = 10
     override val hintText = "Запомни маршрут"
 
     private var hiddenMode = false
@@ -41,7 +41,7 @@ class Level11 : Level() {
         // Платформы (маршрут по памяти)
         // -----------------------------
 
-        engine.addPlatform(0f, 0.85f, 0.10f, 0.83f)
+        engine.addPlatform(0f, 0.87f, 0.11f, 0.89f)
         engine.addPlatform(0.15f, 0.80f, 0.20f, 0.83f)
         engine.addPlatform(0.25f, 0.55f, 0.30f, 0.58f)
         engine.addPlatform(0.40f, 0.60f, 0.45f, 0.63f)
@@ -58,7 +58,7 @@ class Level11 : Level() {
         // -----------------------------
         // Кнопка: запускает "невидимость"
         // -----------------------------
-        engine.placeButton(0.10f, 0.95f)
+        engine.placeButton(0.09f, 0.95f)
 
         engine.onButtonPressed = { e ->
             hiddenMode = true
