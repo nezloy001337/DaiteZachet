@@ -129,10 +129,7 @@ class Level13 : Level() {
 
         engine.placeKey(0.85f, UP_Y, id = 0, color = Color.YELLOW)
 
-        // Убрали автооткрытие двери
-        // engine.openDoorWhenKey(0)
-
-        // Победа только когда игрок физически в двери
+   
         engine.winCondition = { e -> e.playerInsideDoor() }
 
         engine.onUpdate = { e, dt -> tick(e, dt) }
@@ -271,7 +268,7 @@ class Level13 : Level() {
                     if (doorPatchPlatIdx in engine.platforms.indices)
                         engine.platforms[doorPatchPlatIdx].set(-2000f, -2000f, -1990f, -1990f)
 
-                    // Открываем дверь вручную — теперь можно войти
+
                     engine.door.isOpen = true
 
                     doorPhase = 2; shootTimer = 0f
