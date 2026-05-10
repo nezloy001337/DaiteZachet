@@ -73,7 +73,7 @@ class Level09 : Level() {
         engine.onUpdate = { e, dt ->
             if (pressureStarted) {
                 pressureTime += dt
-                val shift = e.room.h * 0.075f * dt
+                val shift = e.room.h * 0.09f * dt
                 topSpikes.forEach { it.bounds.offset(0f, shift) }
                 bottomSpikes.forEach { it.bounds.offset(0f, -shift) }
             }

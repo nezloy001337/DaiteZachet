@@ -14,8 +14,8 @@ class Level12 : Level() {
     override val hintText = "Собери все ключи(следуй радуге)"
 
     companion object {
-        var APPROACH_SPEED = 342f
-        var RETURN_SPEED   = 180f
+        var APPROACH_SPEED = 370f
+        var RETURN_SPEED   = 220f
         private const val SPIKE_W = 28f
         private const val SPIKE_H = 24f
     }
