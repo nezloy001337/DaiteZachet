@@ -131,10 +131,10 @@ class SplashView(context: Context) : View(context), Runnable {
         totalTime += dt
         cycleTime += dt
 
-        val cycleDuration = 2.6f
+        val cycleDuration = 0.75f
         if (cycleTime >= cycleDuration) {
             cycleTime -= cycleDuration
-            progress = (progress + 0.2f).coerceAtMost(1f)
+            progress = (progress + 0.5f).coerceAtMost(1f)
         }
 
         displayedProgress += (progress - displayedProgress) * (dt * 5.5f)
@@ -184,8 +184,8 @@ class SplashView(context: Context) : View(context), Runnable {
         val buttonH = 22f
         val buttonX = centerX + 122f
 
-        val pressPhase = ((cycleTime - 1.55f) / 0.28f).coerceIn(0f, 1f)
-        val releasePhase = ((cycleTime - 1.83f) / 0.24f).coerceIn(0f, 1f)
+        val pressPhase = ((cycleTime - 0.45f) / 0.10f).coerceIn(0f, 1f)
+        val releasePhase = ((cycleTime - 0.55f) / 0.08f).coerceIn(0f, 1f)
         val buttonPress = (pressPhase - releasePhase).coerceAtLeast(0f) * 10f
 
         canvas.drawRoundRect(
@@ -207,7 +207,7 @@ class SplashView(context: Context) : View(context), Runnable {
 
         val bodyW = 130f
         val bodyH = 130f
-        val jumpPhase = ((cycleTime - 0.95f) / 0.85f).coerceIn(0f, 1f)
+        val jumpPhase = ((cycleTime - 0.25f) / 0.30f).coerceIn(0f, 1f)
         val jumpArc = sin(jumpPhase * PI).toFloat()
         val idleBob = sin(totalTime * 2.8f).toFloat() * 4f
 
@@ -235,9 +235,9 @@ class SplashView(context: Context) : View(context), Runnable {
         val h = bottom - top
 
         val blink = when {
-            cycleTime < 0.55f -> 0.10f
-            cycleTime < 0.70f -> 0.55f
-            cycleTime < 0.82f -> 0.18f
+            cycleTime < 0.18f -> 0.10f
+            cycleTime < 0.24f -> 0.55f
+            cycleTime < 0.28f -> 0.18f
             else -> 0.95f
         }
 

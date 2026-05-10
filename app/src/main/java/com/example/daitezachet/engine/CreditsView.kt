@@ -7,11 +7,11 @@ import android.graphics.Typeface
 
 class CreditsView(private val screenW: Float, private val screenH: Float) {
 
-    var scrollY: Float = screenH              // начинаем снизу
-    var finished: Boolean = false             // всё проскроллилось
+    var scrollY: Float = screenH
+    var finished: Boolean = false
     var onDone: (() -> Unit)? = null
 
-    private val scrollSpeed = 90f            // px/сек
+    private val scrollSpeed = 90f
 
     private val titlePaint = Paint().apply {
         color       = Color.rgb(255, 220, 80)
@@ -64,7 +64,6 @@ class CreditsView(private val screenW: Float, private val screenH: Float) {
         "Лепля Михаил"       to "15 уровень"
     )
 
-    // Предпосчитанная высота всего блока
     private val lineHeight = 90f
     private val blockH: Float get() = credits.size * lineHeight + screenH * 0.5f
 
@@ -81,13 +80,11 @@ class CreditsView(private val screenW: Float, private val screenH: Float) {
 
         var y = scrollY
 
-        // Заголовок
         canvas.drawText("Игра окончена!", screenW / 2f, y, titlePaint)
         y += lineHeight * 1.6f
 
         for ((name, role) in credits) {
             if (name == null) {
-                // Раздел-заголовок
                 canvas.drawText(role, screenW / 2f, y, titlePaint)
                 y += lineHeight * 1.4f
             } else {
@@ -101,8 +98,6 @@ class CreditsView(private val screenW: Float, private val screenH: Float) {
         y += lineHeight
         canvas.drawText("Спасибо за игру! ♥", screenW / 2f, y, endPaint)
     }
-
-    /** Тап по экрану — пропустить */
     fun onTap() {
         finished = true
         onDone?.invoke()
