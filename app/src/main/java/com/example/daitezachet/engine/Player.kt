@@ -7,8 +7,8 @@ class Player(startX: Float, startY: Float) {
     companion object {
         const val WIDTH      = 44f
         const val HEIGHT     = 58f
-        const val MOVE_SPEED = 480f   // шире экран в альбомном — быстрее движение
-        const val JUMP_FORCE = -920f  // рассчитано под gameH ≈ 0.80 * 1080
+        const val MOVE_SPEED = 480f
+        const val JUMP_FORCE = -920f
     }
 
     var x: Float = startX
@@ -22,10 +22,12 @@ class Player(startX: Float, startY: Float) {
     val bounds: RectF get() = RectF(x, y, x + WIDTH, y + HEIGHT)
 
     fun reset(startX: Float, startY: Float) {
-        x = startX; y = startY
-        vx = 0f;    vy = 0f
+        x = startX
+        y = startY
+        vx = 0f
+        vy = 0f
         isOnGround = false
-        hasKey     = false
-        isDead     = false
+        hasKey = false
+        isDead = false
     }
 }
