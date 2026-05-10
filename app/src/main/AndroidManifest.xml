@@ -12,8 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DaiteZachet">
 
+        <!-- ЭКРАН ЗАГРУЗКИ — первый при запуске -->
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden">
@@ -22,6 +23,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ГЛАВНОЕ МЕНЮ — открывается после загрузки -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
 
         <activity
             android:name=".LevelSelectActivity"
@@ -34,11 +42,13 @@
             android:exported="false"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+
         <activity
             android:name=".CustomizeActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+
         <activity
             android:name=".RecordsActivity"
             android:exported="false"

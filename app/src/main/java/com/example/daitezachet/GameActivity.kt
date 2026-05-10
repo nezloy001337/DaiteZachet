@@ -13,20 +13,27 @@ class GameActivity : AppCompatActivity() {
 
     private lateinit var gameView: GameView
 
+    companion object {
+        const val EXTRA_START_LEVEL = "start_level"
+        private const val KEY_CURRENT_LEVEL = "current_level"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         @Suppress("DEPRECATION")
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
         val container = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
         }
 
-        val startLevel = intent.getIntExtra(EXTRA_START_LEVEL, 1)
+        // Восстанавливаем уровень из savedInstanceState или из Intent
+        val startLevel = savedInstanceState?.getInt(KEY_CURRENT_LEVEL)
+            ?: intent.getIntExtra(EXTRA_START_LEVEL, 1)
 
         gameView = GameView(this).apply {
             startLevelNumber = startLevel
@@ -40,6 +47,12 @@ class GameActivity : AppCompatActivity() {
         ))
 
         setContentView(container)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Сохраняем ТЕКУЩИЙ уровень (не стартовый!)
+        outState.putInt(KEY_CURRENT_LEVEL, gameView.getCurrentLevelNumber())
     }
 
     private fun showCompleteScreen(container: FrameLayout) {
@@ -58,10 +71,6 @@ class GameActivity : AppCompatActivity() {
                 FrameLayout.LayoutParams.MATCH_PARENT
             ).also { it.gravity = Gravity.CENTER })
         }
-    }
-
-    companion object {
-        const val EXTRA_START_LEVEL = "start_level"
     }
 
     override fun onPause()  { super.onPause();  gameView.pause() }

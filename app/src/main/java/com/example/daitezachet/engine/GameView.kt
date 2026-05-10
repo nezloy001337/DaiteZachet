@@ -31,7 +31,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     var startLevelNumber = 1
     private var levelNumber = 1
 
-    // Overlay timers
+    // НОВЫЙ МЕТОД: геттер для текущего уровня
+    fun getCurrentLevelNumber(): Int = levelNumber
+
     private var deathTimer = 0f;  private var showDeath = false
     private var winTimer   = 0f;  private var showWin   = false
     private val DEATH_DELAY = 1.0f
@@ -40,11 +42,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     var onGameComplete: (() -> Unit)? = null
     var onExitLevel:    (() -> Unit)? = null
 
-    // Exit button bounds — top-left corner, initialised in surfaceChanged
     private val btnExit = android.graphics.RectF()
-
-    // -------------------------------------------------------------------------
-    // Paints — allocated once
+    private var creditsView: CreditsView? = null
+    private var showCredits = false
 
     private val wallPaint = Paint().apply {
         color = Color.rgb(230, 230, 230); isAntiAlias = false
@@ -81,7 +81,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         color = Color.WHITE; textSize = 44f; isAntiAlias = true; textAlign = Paint.Align.CENTER
         typeface = Typeface.DEFAULT_BOLD
     }
-
     private val ctrlFillPaint = Paint().apply {
         style = Paint.Style.FILL; isAntiAlias = true
     }
@@ -103,9 +102,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     private val overlayPaint = Paint()
     private val spikePathBuf = Path()
 
-    // -------------------------------------------------------------------------
-    // SurfaceHolder.Callback
-
     init { holder.addCallback(this) }
 
     override fun surfaceCreated(holder: SurfaceHolder) {}
@@ -115,14 +111,16 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         screenH = height.toFloat()
         gameH   = screenH * 0.78f
         btnExit.set(screenW - 110f, 8f, screenW - 8f, 78f)
-        setupLevel(startLevelNumber)
+
+        // ИСПРАВЛЕНО: не пересоздаём уровень, если он уже был инициализирован
+        if (!::level.isInitialized) {
+            setupLevel(startLevelNumber)
+        }
+
         resume()
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) { pause() }
-
-    // -------------------------------------------------------------------------
-    // Level setup
 
     private fun setupLevel(number: Int) {
         levelNumber = number
@@ -143,7 +141,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         winTimer = 0f
     }
 
-
     fun resume() {
         if (running) return
         running = true
@@ -155,9 +152,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         try { thread?.join(600) } catch (_: InterruptedException) {}
         thread = null
     }
-
-    // -------------------------------------------------------------------------
-    // Game loop
 
     override fun run() {
         var lastNs = System.nanoTime()
@@ -190,10 +184,23 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
             showWin -> {
                 winTimer += dt
                 if (winTimer >= WIN_DELAY) {
-                    showWin = false; winTimer = 0f
+                    showWin = false
+                    winTimer = 0f
                     val next = levelNumber + 1
-                    if (next <= LevelRegistry.count) setupLevel(next)
-                    else post { onGameComplete?.invoke() }
+                    if (next <= LevelRegistry.count) {
+                        setupLevel(next)
+                    } else {
+                        showCredits = true
+                        creditsView = CreditsView(screenW, screenH).also { cv ->
+                            cv.onDone = { post { onGameComplete?.invoke() } }
+                        }
+                    }
+                }
+            }
+            showCredits -> {
+                creditsView?.update(dt)
+                if (creditsView?.finished == true) {
+                    showCredits = false
                 }
             }
             else -> {
@@ -240,6 +247,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
         if (showDeath) drawDeathOverlay(canvas)
         if (showWin)   drawWinOverlay(canvas)
+        if (showCredits) {
+            creditsView?.draw(canvas)
+        }
     }
 
     private fun drawRoom(canvas: Canvas) {
@@ -269,7 +279,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         val b = engine.button.bounds
         buttonPaint.color = if (engine.button.isPressed)
             Color.rgb(160, 20, 20) else Color.rgb(230, 50, 50)
-        // Slightly raised appearance when not pressed
         if (!engine.button.isPressed) {
             buttonPaint.color = Color.rgb(180, 30, 30)
             canvas.drawRoundRect(b.left - 3f, b.top - 6f, b.right + 3f, b.bottom, 6f, 6f, buttonPaint)
@@ -341,7 +350,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
         hintPaint.alpha = 200
         canvas.drawText(level.hintText, screenW / 2f, 66f, hintPaint)
-
 
         val currentTimeMs = if (finishedLevelTimeMs >= 0L) {
             finishedLevelTimeMs
@@ -512,7 +520,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         canvas.restore()
     }
 
-
     private fun drawDiamond(canvas: Canvas, bounds: RectF, paint: Paint) {
         spikePathBuf.rewind()
         spikePathBuf.moveTo(bounds.centerX(), bounds.top)
@@ -522,7 +529,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         spikePathBuf.close()
         canvas.drawPath(spikePathBuf, paint)
     }
-
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!::input.isInitialized) return true
@@ -537,6 +543,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         }
 
         if (showDeath || showWin) return true
+        if (showCredits) {
+            creditsView?.onTap()
+            return true
+        }
         return input.onTouch(event, engine)
     }
 
