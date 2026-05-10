@@ -10,8 +10,8 @@ import com.example.daitezachet.engine.SpikeDir
 
 class Level12 : Level() {
 
-    override val number   = 11
-    override val hintText = "Собери все ключи"
+    override val number   = 12
+    override val hintText = "Собери все ключи(следуй радуге)"
 
     companion object {
         var APPROACH_SPEED = 342f

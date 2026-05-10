@@ -66,7 +66,7 @@ class GameEngine(val room: Room) {
 
         // Jump cut: отпустил кнопку в полёте → обрезаем скорость вверх,
         // но только после истечения льготного окна (первые JUMP_GRACE секунд — без обрезки).
-        if (prevJumpHeld && !jumpHeld && player.vy < 0f && jumpGraceTimer <= 0f) {
+        if (prevJumpHeld && !jumpHeld && player.vy < 0f) {
             player.vy = player.vy.coerceAtLeast(-320f)
         }
         prevJumpHeld = jumpHeld
