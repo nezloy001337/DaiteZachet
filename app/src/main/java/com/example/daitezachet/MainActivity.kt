@@ -14,6 +14,7 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -27,6 +28,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.daitezachet.engine.CreditsView
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,11 +44,19 @@ class MainActivity : AppCompatActivity() {
         catch (e: Exception) { Typeface.MONOSPACE }
     }
 
+    private lateinit var root: FrameLayout
+    private var creditsHost: FrameLayout? = null
+    private var creditsContentView: View? = null
+    private var creditsView: CreditsView? = null
+    private var creditsRunner: Runnable? = null
+    private var creditsOverlayVisible = false
+    private var creditsLastFrameMs = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         goFullscreen()
 
-        val root = FrameLayout(this).apply {
+        root = FrameLayout(this).apply {
             setBackgroundColor(BG_COLOR)
         }
 
@@ -142,10 +152,14 @@ class MainActivity : AppCompatActivity() {
         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
 
         addView(buildFooterLabel("v1.0  ·  15 уровней"))
+        addView(buildSpacer(dp(8)))
+        addView(buildTinyButton("ТИТРЫ") {
+            showCreditsOverlay()
+        })
     }
 
     private fun buildTitle(): TextView = TextView(this).apply {
-        text = "DAITE\nZACHET"
+        text = "DAITE ZACHET"
         typeface = pixelFont
         textSize = 32f
         setTextColor(TEXT_WHITE)
@@ -239,6 +253,143 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun buildTinyButton(label: String, onClick: () -> Unit): View {
+        val bw = dp(1)
+
+        fun makeBg(fill: Int): Drawable {
+            val stroke = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 0f
+                setColor(ACCENT_DIM)
+            }
+            val inner = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 0f
+                setColor(fill)
+            }
+            return LayerDrawable(arrayOf(stroke, InsetDrawable(inner, bw)))
+        }
+
+        val states = StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_pressed), makeBg(ACCENT_DARK))
+            addState(intArrayOf(), makeBg(Color.argb(18, 0, 220, 180)))
+        }
+
+        return TextView(this).apply {
+            text = label
+            typeface = pixelFont
+            textSize = 9f
+            setTextColor(Color.argb(180, 220, 240, 255))
+            gravity = Gravity.CENTER
+            letterSpacing = 0.08f
+            background = states
+            setPadding(dp(12), dp(6), dp(12), dp(6))
+            isClickable = true
+            isFocusable = true
+            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+
+            setOnTouchListener { v, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        v.animate().alpha(0.8f).scaleX(0.96f).scaleY(0.96f).setDuration(70).start()
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        v.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(100).start()
+                    }
+                }
+                false
+            }
+
+            setOnClickListener { onClick() }
+        }
+    }
+
+    private fun showCreditsOverlay() {
+        if (creditsOverlayVisible) return
+        creditsOverlayVisible = true
+        creditsLastFrameMs = SystemClock.elapsedRealtime()
+
+        val host = FrameLayout(this).apply {
+            setBackgroundColor(Color.argb(235, 5, 8, 16))
+            alpha = 0f
+            isClickable = true
+            isFocusable = true
+        }
+
+        val cv = CreditsView(resources.displayMetrics.widthPixels.toFloat(), resources.displayMetrics.heightPixels.toFloat())
+        cv.onDone = {
+            runOnUiThread { hideCreditsOverlay() }
+        }
+        creditsView = cv
+
+        val contentView = object : View(this) {
+            override fun onDraw(canvas: Canvas) {
+                super.onDraw(canvas)
+                creditsView?.draw(canvas)
+            }
+        }
+        creditsContentView = contentView
+
+        val closeHint = TextView(this).apply {
+            text = "Нажми в любом месте, чтобы закрыть"
+            typeface = Typeface.MONOSPACE
+            textSize = 10f
+            setTextColor(Color.argb(140, 210, 220, 240))
+            gravity = Gravity.CENTER
+            letterSpacing = 0.04f
+        }
+
+        host.addView(contentView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        host.addView(
+            closeHint,
+            FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+                bottomMargin = dp(26)
+            }
+        )
+
+        val runner = object : Runnable {
+            override fun run() {
+                if (!creditsOverlayVisible) return
+
+                val now = SystemClock.elapsedRealtime()
+                val dt = ((now - creditsLastFrameMs) / 1000f).coerceIn(0f, 0.05f)
+                creditsLastFrameMs = now
+
+                creditsView?.update(dt)
+                creditsContentView?.invalidate()
+                host.postDelayed(this, 16L)
+            }
+        }
+        creditsRunner = runner
+        creditsHost = host
+
+        host.setOnClickListener {
+            creditsView?.onTap()
+        }
+
+        root.addView(host, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        host.animate().alpha(1f).setDuration(220).start()
+        host.post(runner)
+    }
+
+    private fun hideCreditsOverlay() {
+        if (!creditsOverlayVisible) return
+        creditsOverlayVisible = false
+
+        val host = creditsHost
+        creditsHost = null
+        creditsContentView = null
+        creditsView = null
+        creditsRunner = null
+
+        host?.animate()?.alpha(0f)?.setDuration(180)?.withEndAction {
+            root.removeView(host)
+        }?.start()
+    }
+
     private fun buildFooterLabel(text: String): TextView = TextView(this).apply {
         this.text = text
         typeface = Typeface.MONOSPACE
@@ -277,6 +428,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun dp(v: Int): Int =
         (v * resources.displayMetrics.density + 0.5f).toInt()
+
+    override fun onPause() {
+        super.onPause()
+        hideCreditsOverlay()
+    }
 
     private inner class GridOverlayView(context: android.content.Context) : View(context) {
         private val paint = Paint().apply {

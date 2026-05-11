@@ -68,8 +68,8 @@ class Level12 : Level() {
 
         engine.addPlatform(0.45f, 0.44f, 0.6f, 0.48f)
 
-        engine.placeKey(0.2f, 0.94f, id = 0, color = Color.WHITE) //1
-        engine.placeKey(0.50f, 0.44f, id = 1, color = Color.RED) //2
+        engine.placeKey(0.2f, 0.94f, id = 0, color = Color.RED) //1
+        engine.placeKey(0.50f, 0.44f, id = 1, color = Color.rgb(255,100,0)) //2
         engine.placeKey(0.04f, 0.18f, id = 2, color = Color.CYAN) //5
         engine.placeKey(0.2f, 0.18f, id = 3, color = Color.YELLOW) //3
 
